@@ -78,74 +78,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-artifacts:
-    name: Build - ${{ matrix.target }}
-    needs: create-release
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-          - target: x86_64-apple-darwin
-            os: macos-latest
-          - target: aarch64-apple-darwin
-            os: macos-latest
-    
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ matrix.target }}
-
-      - name: Build release binary
-        run: cargo build --release --target ${{ matrix.target }}
-
-      - name: Package binary (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          cd target/${{ matrix.target }}/release
-          tar czf ../../../cloudscraper-rs-${{ needs.create-release.outputs.version }}-${{ matrix.target }}.tar.gz cloudscraper-rs
-          cd -
-
-      - name: Package binary (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          cd target/${{ matrix.target }}/release
-          7z a ../../../cloudscraper-rs-${{ needs.create-release.outputs.version }}-${{ matrix.target }}.zip cloudscraper-rs.exe
-          cd -
-
-      - name: Upload Release Asset (Unix)
-        if: runner.os != 'Windows'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ needs.create-release.outputs.version }}
-          files: cloudscraper-rs-${{ needs.create-release.outputs.version }}-${{ matrix.target }}.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Release Asset (Windows)
-        if: runner.os == 'Windows'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ needs.create-release.outputs.version }}
-          files: cloudscraper-rs-${{ needs.create-release.outputs.version }}-${{ matrix.target }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   publish-crate:
     name: Publish to crates.io
-    needs: [create-release, build-artifacts]
+    needs: create-release
     runs-on: ubuntu-latest
-    if: "!contains(needs.create-release.outputs.version, '-')"
+    if: ${{ !contains(needs.create-release.outputs.version, '-') }}
     steps:
       - uses: actions/checkout@v4
 
