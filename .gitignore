@@ -1,0 +1,13 @@
+# Rust build output
+/target/
+**/*.rs.bk
+
+# Tooling and editor state
+.vscode/
+.idea/
+*.iml
+/.fleet/
+
+# OS cruft
+.DS_Store
+Thumbs.db

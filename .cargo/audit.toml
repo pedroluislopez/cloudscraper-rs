@@ -1,0 +1,16 @@
+# Cargo audit configuration
+# This file configures which advisories to ignore when running `cargo audit`
+
+[advisories]
+# Ignore unmaintained crates that don't have security vulnerabilities
+# These are warnings only and don't represent actual security issues
+ignore = [
+    "RUSTSEC-2025-0057",  # fxhash - unmaintained (via selectors -> scraper)
+    "RUSTSEC-2024-0436",  # paste - unmaintained (via boa_engine)
+]
+
+# Alternatively, you can ignore all unmaintained warnings with:
+# ignore-unmaintained = true
+
+# Only fail on vulnerabilities, not warnings
+# vulnerability-warnings = false
